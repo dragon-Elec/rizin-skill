@@ -1,6 +1,6 @@
 ---
 name: rizin
-description: Rizin reverse-engineering & debugging. Use for static analysis, dynamic debugging, disassembly, patching, binary inspection of ELF/PE/Mach-O/raw/firmware, and debugging with the built-in debugger or gdb/windbg backends.
+description: Interactive binary reverse engineering with rizin — disassemble functions, find strings, inspect imports/exports, trace control flow, analyze malware, work CTF challenges, or do vulnerability research. Use when user wants to open a binary and explore it, on phrases like "open this binary", "reverse engineer", "disassemble", "analyze this binary", "debug this executable", "what does this function do", "find the flag", "find the password in this crackme", "inspect ELF/PE imports and strings", or any RE task involving an executable or library file. Covers static analysis, dynamic debugging, disassembly, patching, binary inspection of ELF/PE/Mach-O/raw/firmware, and debugging with the built-in debugger or gdb/windbg backends.
 ---
 
 > **Knowledge snapshot:** Rizin v0.9.1
@@ -27,7 +27,40 @@ Prompt shows current offset: `[0x...]>`. Command syntax: `[.][times][cmd][~grep]
 - `-a arch -b bits`, `-e k=v`, `-s addr` (seek), `-i file` (script after open), `-I file` (before open), `-n` (no bin info), `-p prj.rzdb` (project).
 - `-D backend gdb://host:port` — select debug backend by URI.
 
+## Quick cheat-sheet (strings / imports / flags)
+
+```
+iz / izz / iz~keyword      # strings in data section / all strings / search strings
+px 64 @ addr / pf          # hex dump / print formatted data
+ii / iE / is / il / iI     # imports / exports / symbols / linked libs / binary info
+fl / f name @ addr         # list flags / set a label
+CCa @ addr comment         # add comment at address
+/ string / /x deadbeef     # search string in memory / hex pattern
+/R pop rdi                 # search ROP gadgets matching pattern
+afl~sym. / afl~main        # grep-style filter on function list
+/x 55                      # 55 = push rbp (x86-64 function prologue)
+```
+
+Rizin is not a shell. Don't type `afl | grep foo` or `afl > file.txt` expecting shell
+semantics. Use rizin's own operators: `~foo` grep-style filter (e.g. `afl~main`),
+`~{}` JSON pretty-print, `> file` redirect (works inside rizin), `| shellcmd` pipes
+to shell but quoting is fragile.
+
 ## Static-analysis workflow
+
+Default to one-shot batch mode — faster, no race conditions, clean stdout:
+
+```bash
+rizin -A -q -c 'iI; ii; izz~keyword; afl~main' /path/to/binary
+```
+
+Use `-q` (quiet, exit after commands) with `-c 'cmd1; cmd2; ...'` to chain commands with `;`.
+This is the right default for: triage/orientation (`iI`, `ii`, `iz`, `afl`), extracting
+specific data to grep over, anything scriptable.
+
+Reserve iterative sessions (each command depends on reading the previous output —
+following xrefs, renaming as you go) for genuinely interactive work.
+
 ```
 iI        # binary info (arch, os, bits, canary, PIE, NX)
 iS        # sections;  ii=imports  iE=exports  ie=entry  ir=relocs  iz/izz=strings
@@ -72,6 +105,9 @@ Break early in `ld.so` (libs not loaded) → `dcu entry0` or set `dbg.bep=entry|
 - Search hits become `hit0_N` flags in `searches` space (rm: `f- hit*`). `search.in`/`analysis.in` set search/analysis ranges.
 - Use `@e:k=v` for temporary config, `@ addr` for temporary seek.
 - Machine-readable output (JSON) is preferable for automation; don't assume a command has it unless documented.
+- For large Go/Rust binaries (20MB+), prefer `strings` + `--help` + `rz-bin` over disassembly. A 35MB Go binary has tens of thousands of `sym.func.<addr>` entries with package paths not attached to names — `afl~packagename` will match nothing even when the code is there. `strings BIN | grep -E '/api/|ENV_VAR'` and running `BIN --help` will outperform rizin for attack-surface / config questions.
+- If the binary is packed/obfuscated, note it and suggest unpacking before analysis.
+- Calling conventions: 32-bit x86 args on the stack; x86-64 uses RDI/RSI/RDX/RCX/R8/R9; ARM uses R0-R3; AArch64 uses X0-X7.
 
 ## Escalate
 - Unsure of a command / need options → `?` first, then references, then source.
@@ -81,6 +117,7 @@ Break early in `ld.so` (libs not loaded) → `dcu entry0` or set `dbg.bep=entry|
 ## References map
 | Task | File |
 |---|---|
+| Mission workflows: CTF, malware, vuln research, lifter handoff | references/workflows.md |
 | CLI basics, flags, seeking, print, write | references/commands.md |
 | Static analysis (functions, xrefs, types, vars, sigs) | references/analysis.md |
 | Disassembly, print modes, ESIL/RzIL | references/disassembly.md |

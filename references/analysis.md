@@ -72,3 +72,5 @@ Override opcode/meta properties when analysis imperfect.
 - Run `aa`/`aaa` (or `-A`) before `pdf`/xref/function queries.
 - `aaa` may drop code that analysis deems unreachable (e.g. after unconditional `exit`); if missing, use `afr` from the fcn, or `af-*` + `aa` + targeted `afr` (see IOLI 0x07 example).
 - Rizin may not auto-recognize jump tables; define manually (`Cd` data + `afb+` blocks) or hint.
+- Concrete filter/search examples: `afl~sym.` (functions starting with `sym.`),
+  `afl~main`, `/x 55` (`55` = `push rbp`, x86-64 function prologue).

@@ -53,3 +53,22 @@ Forth-like, comma-separated, stack-based semantics of each instruction. Enable: 
 - `pD` takes byte count; `pd` takes instruction count — don't mix.
 - Function view (`pdf`) requires analysis; else `p: Cannot find function`.
 - ROP gadgets search: `/R` (searching.md), `pdp` for chains, visual `pg` gadgets are unrelated to ROP gadgets.
+- If `pdf` errors with *"Linear size differs too much from the bbsum"*, swap to `pdr`
+  (recursive disasm that follows control flow). Same output, handles non-contiguous functions.
+- `pdc` requires the `rz-ghidra` plugin (`rz-pm -i rz-ghidra`) — if unavailable, fall back to `pdf`.
+- `pdg` is graph-mode disassembly.
+
+## Control flow graphs (CFG)
+
+- `agf @ addr` — ASCII graph of function CFG; `agf` alone = current function.
+- `agg` — DOT graph format; `agd` — detailed DOT graph.
+- `afb` — list basic blocks in function.
+- Export: `agd @ 0x401000 > cfg.dot`, then `dot -Tpng cfg.dot -o cfg.png`.
+- Example: `rizin -A binary -c "agd @ 0x401000 > cfg.dot"`.
+
+## Readability (junior paste-ins)
+
+- `e io.cache=true` — cache I/O (faster analysis).
+- `e asm.syntax=intel` (default x86-64) or `e asm.syntax=att` (x86).
+- `e asm.comments=true` — show comments; `e asm.describe=true` — describe operands.
+- On large binaries use targeted `af @ addr` instead of full `aaa`.

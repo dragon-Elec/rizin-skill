@@ -2,6 +2,12 @@
 
 Rizin CLI: `[.][times][cmd][~grep][@[@iter]addr!size][|>pipe] ; ...`
 
+Rizin is not a shell. Don't type `afl | grep foo` or `afl > file.txt` expecting shell
+semantics. Use rizin's own operators: `~foo` grep-style filter (e.g. `afl~main`),
+`~{}` JSON pretty-print, `> file` redirect (works), `| shellcmd` pipes to shell
+but quoting is fragile. `;` chains internal commands (`s 0x401000; pdf 10` — not `&&`).
+Many commands need `@` for address: `pdf @ 0x401000` (not `pdf 0x401000`).
+
 - `!cmd` → shell command. `!!cmd` → shell, stdout back to rizin.
 - `| program` → pipe command output to external program. `|H` html, `|.` = alias.
 - `> file` / `>> file` → redirect output to file; `2>` stderr; `H>` html.
