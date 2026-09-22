@@ -21,8 +21,9 @@ After install, the skill triggers on phrases like *"analyze this binary"*, *"deb
 ```
 rizin/
 ├── SKILL.md          # Operational memory — small, loads fast, enough for normal sessions
-├── references/       # 14 task-oriented operational references
+├── references/       # 15 task-oriented operational references
 │   ├── workflows.md           # CTF, malware, vuln research, lifter handoff
+│   ├── decompile-yara.md      # decompile doctrine, YARA, Linux triage (universal parts)
 │   ├── debugger.md          # debugging, breakpoints, regs, stack, maps, threads
 │   ├── analysis.md          # static analysis: functions, xrefs, types, variables, signatures
 │   ├── disassembly.md       # print modes, asm.* config, ESIL/RzIL

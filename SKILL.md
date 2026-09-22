@@ -51,12 +51,15 @@ to shell but quoting is fragile.
 Default to one-shot batch mode — faster, no race conditions, clean stdout:
 
 ```bash
-rizin -A -q -c 'iI; ii; izz~keyword; afl~main' /path/to/binary
+rizin -A -q -N -e scr.color=0 -c 'iI; ii; izz~keyword; afl~main' /path/to/binary
 ```
 
-Use `-q` (quiet, exit after commands) with `-c 'cmd1; cmd2; ...'` to chain commands with `;`.
+Use `-A` (full analysis so functions/xrefs/FLIRT exist), `-q` (quit after commands,
+no hang), `-c 'cmd1; cmd2; ...'` chaining with `;`, plus `-N` (ignore user config,
+reproducible) and `-e scr.color=0` (no ANSI escape hell).
 This is the right default for: triage/orientation (`iI`, `ii`, `iz`, `afl`), extracting
-specific data to grep over, anything scriptable.
+specific data to grep over, anything scriptable. Rizin can exit 0 on a bad command —
+grep output for `ERROR:` and missing results.
 
 Reserve iterative sessions (each command depends on reading the previous output —
 following xrefs, renaming as you go) for genuinely interactive work.
@@ -118,6 +121,7 @@ Break early in `ld.so` (libs not loaded) → `dcu entry0` or set `dbg.bep=entry|
 | Task | File |
 |---|---|
 | Mission workflows: CTF, malware, vuln research, lifter handoff | references/workflows.md |
+| Decompile doctrine, YARA, Linux triage appendix | references/decompile-yara.md |
 | CLI basics, flags, seeking, print, write | references/commands.md |
 | Static analysis (functions, xrefs, types, vars, sigs) | references/analysis.md |
 | Disassembly, print modes, ESIL/RzIL | references/disassembly.md |
